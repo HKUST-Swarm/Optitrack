@@ -135,9 +135,9 @@ void PublishedRigidBody::publish(RigidBody &body)
 
   Eigen::Matrix3d imu_R_vicon;
   imu_R_vicon << 1, 0, 0, 0, -1, 0, 0, 0, -1;
-  cur_t = imu_R_vicon * cur_t;
-  cur_q = imu_R_vicon * cur_q;
-  cur_v = imu_R_vicon * cur_v;
+  //cur_t = cur_t;
+  cur_q = cur_q * imu_R_vicon;
+  //cur_v = cur_v;
     nav_msgs::Odometry odometry;
     odometry.header = pose.header;
     odometry.header.frame_id = "world";
