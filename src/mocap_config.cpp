@@ -47,6 +47,8 @@
 #include <geometry_msgs/Pose2D.h>
 #include <tf/transform_datatypes.h>
 #include "mocap_optitrack/mocap_config.h"
+#include <nav_msgs/Odometry.h>
+#include <nav_msgs/Path.h>
 
 const std::string POSE_TOPIC_PARAM_NAME = "pose";
 const std::string POSE2D_TOPIC_PARAM_NAME = "pose2d";
@@ -79,6 +81,9 @@ PublishedRigidBody::PublishedRigidBody(XmlRpc::XmlRpcValue &config_node)
     child_frame_id = (std::string&) config_node[CHILD_FRAME_ID_PARAM_NAME];
     parent_frame_id = (std::string&) config_node[PARENT_FRAME_ID_PARAM_NAME];
   }
+
+  odom_pub = n.advertise<nav_msgs::Odometry>("/opti_track/odom", 1000);
+  
 }
 
 void PublishedRigidBody::publish(RigidBody &body)
@@ -102,6 +107,52 @@ void PublishedRigidBody::publish(RigidBody &body)
     pose.header.frame_id = parent_frame_id;
     pose_pub.publish(pose);
   }
+
+  // caculate velocity
+
+  Eigen::Vector3d cur_t(pose.pose.position.x, pose.pose.position.y, pose.pose.position.z);
+  Eigen::Quaterniond cur_q(pose.pose.orientation.w, pose.pose.orientation.x, pose.pose.orientation.y, pose.pose.orientation.z);
+  double cur_time = pose.header.stamp.toSec();
+
+  position_queue.push(cur_t);
+  time_queue.push(cur_time);
+
+  if((int)position_queue.size() > 5)
+  {
+    position_queue.pop();
+    time_queue.pop();
+  }
+
+  Eigen::Vector3d cur_v(0, 0, 0);
+
+  if((int)position_queue.size() >= 2)
+  {
+    Eigen::Vector3d pre_t = position_queue.front();
+    double pre_time = time_queue.front();
+    cur_v = (cur_t - pre_t) / (cur_time - pre_time);
+  }
+
+    nav_msgs::Odometry odometry;
+    odometry.header = pose.header;
+    odometry.header.frame_id = "world";
+    odometry.pose.pose.position.x = cur_t.x();
+    odometry.pose.pose.position.y = cur_t.y();
+    odometry.pose.pose.position.z = cur_t.z();
+    odometry.pose.pose.orientation.x = cur_q.x();
+    odometry.pose.pose.orientation.y = cur_q.y();
+    odometry.pose.pose.orientation.z = cur_q.z();
+    odometry.pose.pose.orientation.w = cur_q.w();
+    odometry.twist.twist.linear.x = cur_v.x();
+    odometry.twist.twist.linear.y = cur_v.y();
+    odometry.twist.twist.linear.z = cur_v.z();
+    odom_pub.publish(odometry);
+
+
+
+
+
+
+
 
   if (!publish_pose2d && !publish_tf)
   {
@@ -137,6 +188,9 @@ void PublishedRigidBody::publish(RigidBody &body)
     ros::Time timestamp(ros::Time::now());
     tf_pub.sendTransform(tf::StampedTransform(transform, timestamp, parent_frame_id, child_frame_id));
   }
+
+
+
 }
 
 bool PublishedRigidBody::validateParam(XmlRpc::XmlRpcValue &config_node, const std::string &name)

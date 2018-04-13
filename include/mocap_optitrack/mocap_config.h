@@ -50,6 +50,8 @@
 #include <ros/ros.h>
 #include <tf/transform_broadcaster.h>
 #include "mocap_datapackets.h"
+#include <queue>
+#include <eigen3/Eigen/Dense>
 
 class PublishedRigidBody
 {
@@ -69,6 +71,10 @@ class PublishedRigidBody
   tf::TransformBroadcaster tf_pub;
   ros::Publisher pose_pub;
   ros::Publisher pose2d_pub;
+  ros::Publisher odom_pub;
+
+  queue<Eigen::Vector3d> position_queue;
+  queue<double> time_queue;
 
   bool validateParam(XmlRpc::XmlRpcValue &, const std::string &);
 
