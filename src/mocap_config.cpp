@@ -134,7 +134,8 @@ void PublishedRigidBody::publish(RigidBody &body)
 
 
   Eigen::Matrix3d imu_R_vicon;
-  imu_R_vicon << 1, 0, 0, 0, -1, 0, 0, 0, -1;
+  //imu_R_vicon << 1, 0, 0, 0, -1, 0, 0, 0, -1;
+  imu_R_vicon << 1, 0, 0, 0, 1, 0, 0, 0, 1;
   //cur_t = cur_t;
   cur_q = cur_q * imu_R_vicon;
   //cur_v = cur_v;
