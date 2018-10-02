@@ -153,7 +153,7 @@ void MoCapDataFormat::parse()
       seek(byte_count);
 
       // skip marker sizes
-      byte_count = 1 * model.rigidBodies[m].NumberOfMarkers * sizeof(double);
+      byte_count = model.rigidBodies[m].NumberOfMarkers * sizeof(double);
       seek(byte_count);
     }
 
