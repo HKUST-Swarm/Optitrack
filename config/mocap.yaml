@@ -3,8 +3,8 @@
 # Identifier corresponds to Trackable ID set in Tracking Tools
 #
 rigid_bodies:
-    '5':
-        pose: Robot_1/pose
-        pose2d: Robot_1/ground_pose
+    '1':
+        pose: SwarmNode7/pose
+        pose2d: SwarmNode7/ground_pose
         child_frame_id: body
         parent_frame_id: world

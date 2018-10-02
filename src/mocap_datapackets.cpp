@@ -88,7 +88,7 @@ void MoCapDataFormat::parse()
   // count number of packetsets
   read_and_seek(model.numMarkerSets);
   model.markerSets = new MarkerSet[model.numMarkerSets];
-  ROS_DEBUG("Number of marker sets: %d\n", model.numMarkerSets);
+  ROS_INFO("Number of marker sets: %d\n", model.numMarkerSets);
 
   for (int i = 0; i < model.numMarkerSets; i++)
   {
@@ -121,7 +121,7 @@ void MoCapDataFormat::parse()
 
   // read number of rigid bodies of the model
   read_and_seek(model.numRigidBodies);
-  ROS_DEBUG("Number of rigid bodies: %d\n", model.numRigidBodies);
+  ROS_INFO("Number of rigid bodies: %d\n", model.numRigidBodies);
 
   model.rigidBodies = new RigidBody[model.numRigidBodies];
   for (int m = 0; m < model.numRigidBodies; m++)
@@ -130,10 +130,17 @@ void MoCapDataFormat::parse()
     read_and_seek(model.rigidBodies[m].ID);
     read_and_seek(model.rigidBodies[m].pose);
 
+    ROS_INFO("RigidBody %f %f %f", 
+      model.rigidBodies[m].pose.position.x,
+      model.rigidBodies[m].pose.position.y,
+      model.rigidBodies[m].pose.position.z
+    );
+
     // get number of markers per rigid body
     read_and_seek(model.rigidBodies[m].NumberOfMarkers);
-    ROS_DEBUG("Rigid body ID: %d\n", model.rigidBodies[m].ID);
-    ROS_DEBUG("Number of rigid body markers: %d\n", model.rigidBodies[m].NumberOfMarkers);
+    ROS_INFO("Rigid body ID: %d\n", model.rigidBodies[m].ID);
+    ROS_INFO("Number of rigid body markers: %d\n", model.rigidBodies[m].NumberOfMarkers);
+
     if (model.rigidBodies[m].NumberOfMarkers > 0)
     {
       model.rigidBodies[m].marker = new Marker [model.rigidBodies[m].NumberOfMarkers];
@@ -146,12 +153,14 @@ void MoCapDataFormat::parse()
       seek(byte_count);
 
       // skip marker sizes
-      byte_count = model.rigidBodies[m].NumberOfMarkers * sizeof(float);
+      byte_count = 1 * model.rigidBodies[m].NumberOfMarkers * sizeof(double);
       seek(byte_count);
     }
 
     // skip mean marker error
-    seek(sizeof(float));
+    // seek(sizeof(double));
+    seek(6);
+    
   }
 
   // TODO: read skeletons
