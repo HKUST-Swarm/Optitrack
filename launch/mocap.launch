@@ -4,7 +4,7 @@
     name="mocap_node"
     respawn="false"
     launch-prefix=""
-    required="true" output="screen">
+    required="true" output="log">
     <rosparam file="$(find mocap_optitrack)/config/mocap.yaml" command="load" />
   </node>
 </launch>
